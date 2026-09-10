@@ -24,6 +24,10 @@ class SubprocessExecutor:
     """
     Execute a command in a subprocess.
 
+    stderr is merged into stdout, so the progress lines and the error lines of the command stay in
+    chronological order. The returned CompletedProcess therefore has stderr set to None ("not
+    captured", as in the standard library). Read all output from stdout.
+
     Args:
     ----
         capture_output: If True, the output of the command will be captured.
@@ -96,11 +100,11 @@ class SubprocessExecutor:
                     pipe.close()
 
     def execute(self, handle_errors: bool = True) -> subprocess.CompletedProcess[Any] | None:
-        """Execute the command and return the CompletedProcess object if handle_errors is False."""
+        """Execute the command and return the CompletedProcess object if handle_errors is False (stdout holds the merged output, stderr is always None)."""
         start_time = time.monotonic()
         completed_process: subprocess.CompletedProcess[Any] | None = None
         stdout = ""
-        stderr = ""
+        stderr: str | None = None
         self.logger.info(f"Running command: {self.command_str}")
         cwd_path = (self.current_working_directory or Path.cwd()).as_posix()
         process: subprocess.Popen[str] | None = None

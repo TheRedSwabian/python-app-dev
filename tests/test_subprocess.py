@@ -71,6 +71,25 @@ def test_command_execution_scenarios(command: list[str | Path], exp_stdout: str,
     assert result.returncode == exp_returncode
 
 
+@pytest.mark.parametrize(
+    "capture_output, print_output, exp_stdout",
+    [
+        (True, True, "boom"),
+        (True, False, "boom"),
+        (False, True, ""),
+    ],
+)
+def test_stderr_is_none_because_it_is_merged_into_stdout(capture_output: bool, print_output: bool, exp_stdout: str) -> None:
+    result = SubprocessExecutor(
+        ["python", "-c", "import sys; sys.stderr.write('boom')"],
+        capture_output=capture_output,
+        print_output=print_output,
+    ).execute(handle_errors=False)
+    assert result is not None
+    assert result.stdout == exp_stdout
+    assert result.stderr is None
+
+
 @pytest.mark.skipif(platform.system() != "Windows", reason="Junction creation test is Windows-specific")
 def test_junction_creation(tmp_path: Path) -> None:
     test_path = tmp_path / "test"
