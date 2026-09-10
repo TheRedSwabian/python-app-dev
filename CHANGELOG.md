@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v2.22.1 (2026-09-10)
+
+### Bug Fixes
+
+- Quote python_version in pypeline.yaml
+  ([`ed8dfe4`](https://github.com/cuinixam/python-app-dev/commit/ed8dfe484bc7391ae415c5b2aff45c60b60a99c8))
+
+- Report stderr as None when it is merged into stdout
+  ([`0a63612`](https://github.com/cuinixam/python-app-dev/commit/0a63612b23014a644be801f5317600a0cc3a6e1a))
+
+
 ## v2.22.0 (2026-06-12)
 
 ### Features
