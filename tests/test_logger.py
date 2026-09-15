@@ -1,7 +1,45 @@
 from pathlib import Path
 
+import pytest
+
 from py_app_dev.core.docs_utils import validates
-from py_app_dev.core.logging import log_to_file, logger, setup_logger, time_it
+from py_app_dev.core.logging import create_log_format, log_to_file, logger, setup_logger, time_it
+
+
+@pytest.fixture
+def console_capture(capsys):
+    """Capture the console log output and detach the sink afterwards, so that later tests do not write into a closed stream."""
+    yield capsys
+    logger.remove()
+
+
+@pytest.mark.parametrize("show_code_location", [True, False])
+@validates("REQ-LOGGING_CODE_LOCATION-0.0.1")
+def test_create_log_format(show_code_location):
+    log_format = create_log_format(show_code_location)
+    assert ("{name}" in log_format) is show_code_location
+    assert ("{function}" in log_format) is show_code_location
+    assert ("{line}" in log_format) is show_code_location
+    assert "{message}" in log_format
+
+
+@pytest.mark.parametrize("show_code_location", [True, False])
+@validates("REQ-LOGGING_CODE_LOCATION-0.0.1")
+def test_setup_logger_code_location(console_capture, show_code_location):
+    setup_logger(show_code_location=show_code_location)
+    logger.info("Detecting C compiler ABI info")
+    console_output = console_capture.readouterr().out
+    assert "Detecting C compiler ABI info" in console_output
+    assert (":test_setup_logger_code_location:" in console_output) is show_code_location
+
+
+@validates("REQ-LOGGING_CODE_LOCATION-0.0.1")
+def test_setup_logger_hides_code_location_by_default(console_capture):
+    setup_logger()
+    logger.info("Detecting C compiler ABI info")
+    console_output = console_capture.readouterr().out
+    assert "Detecting C compiler ABI info" in console_output
+    assert ":test_setup_logger_hides_code_location_by_default:" not in console_output
 
 
 @validates("REQ-LOGGING_FILE-0.0.1")

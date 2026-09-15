@@ -19,6 +19,10 @@ logger = _logger
 logger.level("START", no=38, color="<yellow>")
 logger.level("STOP", no=39, color="<yellow>")
 
+TIME_AND_LEVEL_FORMAT = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | "
+CODE_LOCATION_FORMAT = "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+MESSAGE_FORMAT = "<level>{message}</level>"
+
 _R = TypeVar("_R")
 _FuncType = Callable[..., _R]
 
@@ -43,13 +47,25 @@ def time_it(message: str | None = None) -> Callable[[_FuncType[_R]], _FuncType[_
     return _time_it
 
 
+@fulfills("REQ-LOGGING_CODE_LOCATION-0.0.1")
+def create_log_format(show_code_location: bool = False) -> str:
+    """Create the console log format, with or without the module, function and line number of the caller."""
+    code_location = CODE_LOCATION_FORMAT if show_code_location else ""
+    return f"{TIME_AND_LEVEL_FORMAT}{code_location}{MESSAGE_FORMAT}"
+
+
 @fulfills("REQ-LOGGING_FILE-0.0.1")
-def setup_logger(log_file: Path | None = None, clear: bool = True) -> None:
-    """Setup logger to stdout and optionally to file."""
+def setup_logger(log_file: Path | None = None, clear: bool = True, show_code_location: bool = False) -> None:
+    """
+    Setup logger to stdout and optionally to file.
+
+    The code location is omitted from the console output unless `show_code_location` is set.
+    It is always kept in the log file, because a log file is read for debugging.
+    """
     logger.remove()
     logger.add(
         sys.stdout,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <level>{message}</level>",
+        format=create_log_format(show_code_location),
     )
     if log_file is not None:
         logger.add(log_file, level="DEBUG")
