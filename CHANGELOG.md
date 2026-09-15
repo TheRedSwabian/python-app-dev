@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v2.23.0 (2026-09-15)
+
+### Features
+
+- Allow hiding code location in console log output
+  ([`4f5fa15`](https://github.com/cuinixam/python-app-dev/commit/4f5fa15503727038465f32069574c93e51a1103b))
+
+setup_logger now takes show_code_location. It is off by default, which keeps the console output of
+  every existing caller unchanged.
+
+The log file is not affected. A log file is read for debugging, so it keeps the code location in all
+  cases.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+
+
 ## v2.22.1 (2026-09-10)
 
 ### Bug Fixes
